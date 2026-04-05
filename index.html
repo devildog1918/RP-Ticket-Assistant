@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Field Tech App</title>
 
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#0f172a"/>
 
   <style>
@@ -48,14 +48,19 @@
       border-radius: 8px;
       font-weight: bold;
     }
+    #installBtn {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
 <div class="app">
   <header>Field Tech App</header>
-
   <div class="content" id="app"></div>
+  <div class="content">
+    <button class="btn" id="installBtn">Install App</button>
+  </div>
 </div>
 
 <script>
@@ -72,6 +77,7 @@ let tickets = [
 
 let current = "list";
 let selected = null;
+let deferredPrompt = null;
 
 function render() {
   const app = document.getElementById("app");
@@ -127,21 +133,45 @@ function addNote(type) {
 
   selected.notes.push(text);
   alert("Update saved");
+  render();
 }
 
 render();
 
-// Register service worker
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
+  window.addEventListener("load", async () => {
+    try {
+      await navigator.serviceWorker.register("./service-worker.js");
+      console.log("Service worker registered");
+    } catch (err) {
+      console.error("Service worker registration failed:", err);
+    }
+  });
 }
 
-// Install prompt
-let deferredPrompt;
+const installBtn = document.getElementById("installBtn");
+
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  installBtn.style.display = "block";
   console.log("Install ready");
+});
+
+installBtn.addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+  console.log("Install choice:", choice.outcome);
+
+  deferredPrompt = null;
+  installBtn.style.display = "none";
+});
+
+window.addEventListener("appinstalled", () => {
+  console.log("App installed");
+  installBtn.style.display = "none";
 });
 </script>
 </body>
