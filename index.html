@@ -1,178 +1,631 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Field Tech App</title>
+import React, { useEffect, useMemo, useState } from 'react';
 
-  <link rel="manifest" href="./manifest.json" />
-  <meta name="theme-color" content="#0f172a"/>
+const STORAGE_KEY = 'field-tech-useful-v1';
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f5f9;
-    }
-    .app {
-      max-width: 420px;
-      margin: auto;
-      background: white;
-      min-height: 100vh;
-    }
-    header {
-      background: #0f172a;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-weight: bold;
-    }
-    .content {
-      padding: 15px;
-    }
-    .ticket {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      background: #0f172a;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-    #installBtn {
-      display: none;
-    }
-  </style>
-</head>
-
-<body>
-<div class="app">
-  <header>Field Tech App</header>
-  <div class="content" id="app"></div>
-  <div class="content">
-    <button class="btn" id="installBtn">Install App</button>
-  </div>
-</div>
-
-<script>
-let tickets = [
+const DEFAULT_TICKETS = [
   {
-    id: "I2604-01234",
-    user: "John Smith",
-    campus: "MRHS",
-    issue: "Projector not working",
-    status: "In Progress",
+    id: 'I2604-01234',
+    status: 'In Progress',
+    priority: 'High',
+    requester: 'John Smith',
+    phone: '281-555-0187',
+    email: 'john.smith@example.org',
+    campus: 'Morton Ranch High School',
+    room: '214',
+    category: 'Classroom Tech',
+    subcategory: 'Display Issue',
+    summary: 'Teacher laptop not connecting to projector',
+    opened: '2026-04-05 08:14',
+    updated: '2026-04-05 10:42',
+    assignedTech: 'Rob Example',
+    assignedGroup: 'Field Support',
+    notes: [
+      { time: '2026-04-05 10:42', tech: 'Rob Example', body: 'Technician arrived on site and began troubleshooting.' },
+      { time: '2026-04-05 09:57', tech: 'Dispatch', body: 'Assigned to field technician.' }
+    ]
+  },
+  {
+    id: 'I2604-01241',
+    status: 'New',
+    priority: 'Medium',
+    requester: 'Lisa Perez',
+    phone: '281-555-0139',
+    email: 'lisa.perez@example.org',
+    campus: 'ESC',
+    room: '2790',
+    category: 'Badge Services',
+    subcategory: 'Printer Issue',
+    summary: 'Badge printer not feeding correctly',
+    opened: '2026-04-05 08:48',
+    updated: '2026-04-05 09:18',
+    assignedTech: 'Rob Example',
+    assignedGroup: 'Field Support',
+    notes: [
+      { time: '2026-04-05 09:18', tech: 'Help Desk', body: 'Ticket created and routed to field support.' }
+    ]
+  },
+  {
+    id: 'I2604-01256',
+    status: 'Waiting',
+    priority: 'Low',
+    requester: 'Mark Zahn',
+    phone: '281-555-0172',
+    email: 'mark.zahn@example.org',
+    campus: 'Maintenance',
+    room: 'Front Office',
+    category: 'Cellular Devices',
+    subcategory: 'Pickup',
+    summary: 'Cell phone setup pending pickup',
+    opened: '2026-04-04 14:10',
+    updated: '2026-04-04 15:32',
+    assignedTech: 'Rob Example',
+    assignedGroup: 'Field Support',
+    notes: [
+      { time: '2026-04-04 15:32', tech: 'Rob Example', body: 'Waiting on user pickup confirmation.' }
+    ]
+  },
+  {
+    id: 'I2604-01262',
+    status: 'New',
+    priority: 'High',
+    requester: 'Amy Brooks',
+    phone: '281-555-0105',
+    email: 'amy.brooks@example.org',
+    campus: 'Taylor High School',
+    room: 'Library',
+    category: 'Wireless',
+    subcategory: 'Access Point',
+    summary: 'Library Chromebook cart losing Wi-Fi connection',
+    opened: '2026-04-05 11:05',
+    updated: '2026-04-05 11:05',
+    assignedTech: 'Rob Example',
+    assignedGroup: 'Field Support',
     notes: []
+  },
+  {
+    id: 'I2604-01270',
+    status: 'Waiting',
+    priority: 'Medium',
+    requester: 'Daniel Ramirez',
+    phone: '281-555-0168',
+    email: 'daniel.ramirez@example.org',
+    campus: 'Police - Security',
+    room: 'Desk 3',
+    category: 'Cellular Devices',
+    subcategory: 'Upgrade',
+    summary: 'Replacement phone staged; waiting on pickup appointment',
+    opened: '2026-04-05 07:42',
+    updated: '2026-04-05 09:50',
+    assignedTech: 'Rob Example',
+    assignedGroup: 'Field Support',
+    notes: [
+      { time: '2026-04-05 09:50', tech: 'Rob Example', body: 'Device configured and ready for pickup scheduling.' }
+    ]
   }
 ];
 
-let current = "list";
-let selected = null;
-let deferredPrompt = null;
+const QUICK_ACTIONS = {
+  'On Site': {
+    body: 'Technician arrived on site and began troubleshooting.',
+    status: 'In Progress',
+  },
+  'Contacted User': {
+    body: 'Contacted user and reviewed reported issue.',
+    status: 'In Progress',
+  },
+  'Waiting on User': {
+    body: 'Waiting on user response or availability.',
+    status: 'Waiting',
+  },
+  'Waiting on Part': {
+    body: 'Waiting on required equipment or part to continue.',
+    status: 'Waiting',
+  },
+  'Resolved': {
+    body: 'Issue resolved and functionality confirmed.',
+    status: 'Resolved',
+  },
+  'Working Note': {
+    body: 'Troubleshooting is in progress.',
+    status: 'In Progress',
+  },
+};
 
-function render() {
-  const app = document.getElementById("app");
-
-  if (current === "list") {
-    app.innerHTML = tickets.map(t => `
-      <div class="ticket" onclick="openTicket('${t.id}')">
-        <b>${t.id}</b><br>
-        ${t.user}<br>
-        ${t.campus}<br>
-        ${t.issue}<br>
-        <small>${t.status}</small>
-      </div>
-    `).join("");
-  }
-
-  if (current === "detail") {
-    const t = selected;
-    app.innerHTML = `
-      <h3>${t.id}</h3>
-      ${t.user}<br>
-      ${t.campus}<br>
-      ${t.issue}<br><br>
-
-      <button class="btn" onclick="addNote('On Site')">On Site</button>
-      <button class="btn" onclick="addNote('Contacted')">Contacted</button>
-      <button class="btn" onclick="addNote('Resolved')">Resolved</button>
-      <button class="btn" onclick="goBack()">Back</button>
-    `;
-  }
+function nowStamp() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  let hh = d.getHours();
+  const ampm = hh >= 12 ? 'PM' : 'AM';
+  hh = hh % 12 || 12;
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${min} ${ampm}`;
 }
 
-function openTicket(id) {
-  selected = tickets.find(t => t.id === id);
-  current = "detail";
-  render();
-}
-
-function goBack() {
-  current = "list";
-  render();
-}
-
-function addNote(type) {
-  let text = "";
-
-  if (type === "On Site") text = "Technician arrived on site.";
-  if (type === "Contacted") text = "User contacted.";
-  if (type === "Resolved") {
-    text = "Issue resolved.";
-    selected.status = "Resolved";
-  }
-
-  selected.notes.push(text);
-  alert("Update saved");
-  render();
-}
-
-render();
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      await navigator.serviceWorker.register("./service-worker.js");
-      console.log("Service worker registered");
-    } catch (err) {
-      console.error("Service worker registration failed:", err);
-    }
+function formatCampusGroup(tickets) {
+  const groups = {};
+  tickets.forEach((ticket) => {
+    if (!groups[ticket.campus]) groups[ticket.campus] = [];
+    groups[ticket.campus].push(ticket);
   });
+  return Object.entries(groups);
 }
 
-const installBtn = document.getElementById("installBtn");
+export default function FieldTechAppUsefulV1() {
+  const [screen, setScreen] = useState('tickets');
+  const [tickets, setTickets] = useState(DEFAULT_TICKETS);
+  const [selectedTicketId, setSelectedTicketId] = useState(DEFAULT_TICKETS[0].id);
+  const [search, setSearch] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [viewMode, setViewMode] = useState('list');
+  const [selectedAction, setSelectedAction] = useState('Working Note');
+  const [updateText, setUpdateText] = useState(QUICK_ACTIONS['Working Note'].body);
+  const [statusChange, setStatusChange] = useState(QUICK_ACTIONS['Working Note'].status);
+  const [assetTag, setAssetTag] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
+  const [roomNumber, setRoomNumber] = useState('');
+  const [offlineQueue, setOfflineQueue] = useState(0);
+  const [syncMessage, setSyncMessage] = useState('Local mode ready');
 
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = "block";
-  console.log("Install ready");
-});
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.tickets?.length) setTickets(parsed.tickets);
+        if (typeof parsed.offlineQueue === 'number') setOfflineQueue(parsed.offlineQueue);
+        setSyncMessage('Loaded saved local data');
+      } catch {
+        setSyncMessage('Could not read saved data');
+      }
+    }
+  }, []);
 
-installBtn.addEventListener("click", async () => {
-  if (!deferredPrompt) return;
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ tickets, offlineQueue }));
+  }, [tickets, offlineQueue]);
 
-  deferredPrompt.prompt();
-  const choice = await deferredPrompt.userChoice;
-  console.log("Install choice:", choice.outcome);
+  const selectedTicket = tickets.find((ticket) => ticket.id === selectedTicketId) || tickets[0];
 
-  deferredPrompt = null;
-  installBtn.style.display = "none";
-});
+  const filteredTickets = useMemo(() => {
+    return tickets.filter((ticket) => {
+      const q = search.trim().toLowerCase();
+      const haystack = [
+        ticket.id,
+        ticket.requester,
+        ticket.campus,
+        ticket.room,
+        ticket.summary,
+        ticket.status,
+        ticket.priority,
+      ]
+        .join(' ')
+        .toLowerCase();
 
-window.addEventListener("appinstalled", () => {
-  console.log("App installed");
-  installBtn.style.display = "none";
-});
-</script>
-</body>
-</html>
+      const matchesSearch = !q || haystack.includes(q);
+      const matchesFilter =
+        activeFilter === 'All' ||
+        (activeFilter === 'New' && ticket.status === 'New') ||
+        (activeFilter === 'In Progress' && ticket.status === 'In Progress') ||
+        (activeFilter === 'Waiting' && ticket.status === 'Waiting') ||
+        (activeFilter === 'Resolved' && ticket.status === 'Resolved') ||
+        (activeFilter === 'High Priority' && ticket.priority === 'High');
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [tickets, search, activeFilter]);
+
+  const campusGroups = useMemo(() => formatCampusGroup(filteredTickets), [filteredTickets]);
+
+  const phoneShell = 'mx-auto w-full max-w-[390px] rounded-[2rem] border bg-white shadow-2xl overflow-hidden';
+  const card = 'rounded-2xl border border-slate-200 bg-white shadow-sm';
+  const chip = 'rounded-full border px-3 py-1 text-xs font-medium whitespace-nowrap';
+  const sectionTitle = 'text-xs font-semibold uppercase tracking-wide text-slate-500';
+
+  function openTicket(ticketId) {
+    setSelectedTicketId(ticketId);
+    setScreen('detail');
+  }
+
+  function startUpdate(action = 'Working Note') {
+    setSelectedAction(action);
+    setUpdateText(QUICK_ACTIONS[action].body);
+    setStatusChange(QUICK_ACTIONS[action].status);
+    setAssetTag('');
+    setSerialNumber('');
+    setRoomNumber(selectedTicket?.room || '');
+    setScreen('update');
+  }
+
+  function saveUpdate(mode = 'live') {
+    if (!selectedTicket) return;
+
+    const stamp = nowStamp();
+    const status = statusChange || selectedTicket.status;
+    const extra = [
+      assetTag ? `Asset Tag: ${assetTag}` : '',
+      serialNumber ? `Serial: ${serialNumber}` : '',
+      roomNumber ? `Room: ${roomNumber}` : '',
+    ].filter(Boolean);
+    const finalBody = [updateText, ...extra].join('\n');
+
+    setTickets((current) =>
+      current.map((ticket) =>
+        ticket.id === selectedTicket.id
+          ? {
+              ...ticket,
+              status,
+              room: roomNumber || ticket.room,
+              updated: stamp,
+              notes: [{ time: stamp, tech: 'Rob Example', body: finalBody }, ...ticket.notes],
+            }
+          : ticket
+      )
+    );
+
+    if (mode === 'offline') {
+      setOfflineQueue((count) => count + 1);
+      setSyncMessage('Update saved locally; sync pending');
+    } else {
+      setSyncMessage('Local update saved');
+    }
+
+    setScreen('detail');
+  }
+
+  function resetDemoData() {
+    setTickets(DEFAULT_TICKETS);
+    setOfflineQueue(0);
+    localStorage.removeItem(STORAGE_KEY);
+    setSelectedTicketId(DEFAULT_TICKETS[0].id);
+    setSyncMessage('Demo data reset');
+    setScreen('tickets');
+  }
+
+  function syncOfflineQueue() {
+    setOfflineQueue(0);
+    setSyncMessage('Offline queue cleared for demo');
+  }
+
+  function renderTickets() {
+    const filters = ['All', 'New', 'In Progress', 'Waiting', 'Resolved', 'High Priority'];
+
+    return (
+      <div className={phoneShell}>
+        <div className="border-b bg-slate-900 px-4 py-4 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-lg font-bold">Field Tech</div>
+              <div className="text-xs text-slate-300">Useful V1 Standalone</div>
+            </div>
+            <button onClick={() => setScreen('settings')} className="rounded-full border border-slate-600 px-3 py-1 text-xs">Menu</button>
+          </div>
+        </div>
+
+        <div className="p-4">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search ticket, user, campus, room"
+            className="w-full rounded-xl border px-4 py-3 text-sm"
+          />
+
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {filters.map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setActiveFilter(filter)}
+                  className={`${chip} ${activeFilter === filter ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700'}`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold ${viewMode === 'list' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}
+            >
+              List
+            </button>
+            <button
+              onClick={() => setViewMode('campus')}
+              className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold ${viewMode === 'campus' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}
+            >
+              By Campus
+            </button>
+          </div>
+
+          <div className="mt-3 rounded-2xl bg-slate-50 p-3 text-xs text-slate-600">
+            {filteredTickets.length} tickets shown · Offline queue: {offlineQueue}
+          </div>
+
+          <div className="mt-4 space-y-4">
+            {viewMode === 'list' &&
+              filteredTickets.map((ticket) => (
+                <button key={ticket.id} onClick={() => openTicket(ticket.id)} className={`${card} block w-full p-4 text-left`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="font-bold text-slate-900">{ticket.id}</div>
+                    <div className="flex gap-2">
+                      <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold">{ticket.status}</span>
+                      <span className="rounded-full bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white">{ticket.priority}</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-slate-800">{ticket.requester}</div>
+                  <div className="text-xs text-slate-600">{ticket.campus} · Room {ticket.room}</div>
+                  <div className="mt-2 text-sm text-slate-700">{ticket.summary}</div>
+                  <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                    <span>Updated {ticket.updated}</span>
+                    <span className="font-semibold text-slate-700">Open</span>
+                  </div>
+                </button>
+              ))}
+
+            {viewMode === 'campus' &&
+              campusGroups.map(([campus, group]) => (
+                <div key={campus} className={`${card} p-4`}>
+                  <div className="mb-3 text-sm font-bold text-slate-900">{campus}</div>
+                  <div className="space-y-3">
+                    {group.map((ticket) => (
+                      <button key={ticket.id} onClick={() => openTicket(ticket.id)} className="block w-full rounded-xl border border-slate-200 p-3 text-left">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="text-sm font-semibold text-slate-800">{ticket.id}</div>
+                          <div className="text-[10px] text-slate-500">{ticket.status}</div>
+                        </div>
+                        <div className="mt-1 text-xs text-slate-600">{ticket.requester} · Room {ticket.room}</div>
+                        <div className="mt-1 text-sm text-slate-700">{ticket.summary}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 border-t bg-white text-center text-xs font-medium text-slate-600">
+          <button onClick={() => setScreen('tickets')} className="py-3 text-slate-900">Tickets</button>
+          <button onClick={() => setViewMode(viewMode === 'list' ? 'campus' : 'list')} className="py-3">Queue</button>
+          <button onClick={() => startUpdate('Working Note')} className="py-3">Update</button>
+          <button onClick={() => setScreen('settings')} className="py-3">Settings</button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderDetail() {
+    if (!selectedTicket) return null;
+
+    return (
+      <div className={`${phoneShell} relative`}>
+        <div className="flex items-center justify-between border-b px-4 py-4">
+          <button onClick={() => setScreen('tickets')} className="text-sm text-slate-500">← Back</button>
+          <div className="font-bold">{selectedTicket.id}</div>
+          <button onClick={() => setScreen('settings')} className="text-sm text-slate-500">⋯</button>
+        </div>
+
+        <div className="space-y-4 p-4 pb-24">
+          <div className={`${card} p-4`}>
+            <div className={sectionTitle}>Main Info</div>
+            <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
+              <div><span className="text-slate-500">Status:</span><br /><span className="font-semibold">{selectedTicket.status}</span></div>
+              <div><span className="text-slate-500">Priority:</span><br /><span className="font-semibold">{selectedTicket.priority}</span></div>
+              <div><span className="text-slate-500">Category:</span><br /><span className="font-semibold">{selectedTicket.category}</span></div>
+              <div><span className="text-slate-500">Subcategory:</span><br /><span className="font-semibold">{selectedTicket.subcategory}</span></div>
+            </div>
+            <div className="mt-3 text-sm text-slate-700">{selectedTicket.summary}</div>
+          </div>
+
+          <div className={`${card} p-4`}>
+            <div className={sectionTitle}>Requester</div>
+            <div className="mt-2 text-sm leading-6 text-slate-700">
+              {selectedTicket.requester}<br />
+              {selectedTicket.phone}<br />
+              {selectedTicket.email}<br />
+              {selectedTicket.campus}<br />
+              Room {selectedTicket.room}
+            </div>
+          </div>
+
+          <div className={`${card} p-4`}>
+            <div className={sectionTitle}>Assignment</div>
+            <div className="mt-2 text-sm leading-6 text-slate-700">
+              {selectedTicket.assignedTech}<br />
+              {selectedTicket.assignedGroup}<br />
+              Opened: {selectedTicket.opened}<br />
+              Updated: {selectedTicket.updated}
+            </div>
+          </div>
+
+          <div className={`${card} p-4`}>
+            <div className={sectionTitle}>Recent Updates</div>
+            <div className="mt-3 space-y-3">
+              {selectedTicket.notes.length === 0 && <div className="text-sm text-slate-500">No updates yet.</div>}
+              {selectedTicket.notes.map((note, idx) => (
+                <div key={`${note.time}-${idx}`} className="rounded-xl bg-slate-50 p-3 text-sm">
+                  <div className="text-xs text-slate-500">{note.time} · {note.tech}</div>
+                  <div className="mt-1 whitespace-pre-line text-slate-700">{note.body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 border-t bg-white p-3">
+          <div className="grid grid-cols-5 gap-2 text-center text-[11px] font-semibold">
+            {['On Site', 'Contacted User', 'Waiting on User', 'Resolved', 'Working Note'].map((label, i) => (
+              <button
+                key={label}
+                onClick={() => startUpdate(label)}
+                className={`rounded-xl px-2 py-3 ${i === 4 ? 'bg-slate-900 text-white' : 'border text-slate-700'}`}
+              >
+                {i === 4 ? 'Add Note' : label.replace(' on ', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderUpdate() {
+    const statusOptions = ['New', 'In Progress', 'Waiting', 'Resolved'];
+
+    return (
+      <div className={phoneShell}>
+        <div className="border-b px-4 py-4">
+          <button onClick={() => setScreen('detail')} className="text-sm text-slate-500">← Back</button>
+          <div className="mt-1 font-bold">Add Update</div>
+          <div className="text-xs text-slate-500">{selectedTicket?.id}</div>
+        </div>
+
+        <div className="space-y-4 p-4">
+          <div>
+            <div className={sectionTitle}>Quick Actions</div>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {Object.keys(QUICK_ACTIONS).map((action) => (
+                <button
+                  key={action}
+                  onClick={() => {
+                    setSelectedAction(action);
+                    setUpdateText(QUICK_ACTIONS[action].body);
+                    setStatusChange(QUICK_ACTIONS[action].status);
+                  }}
+                  className={`rounded-xl border px-3 py-3 text-xs font-semibold ${selectedAction === action ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700'}`}
+                >
+                  {action}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className={sectionTitle}>Update Note</div>
+            <textarea
+              value={updateText}
+              onChange={(e) => setUpdateText(e.target.value)}
+              className="mt-2 min-h-[120px] w-full rounded-2xl border p-4 text-sm text-slate-700"
+            />
+          </div>
+
+          <div>
+            <div className={sectionTitle}>Optional Fields</div>
+            <div className="mt-2 space-y-2">
+              <input value={assetTag} onChange={(e) => setAssetTag(e.target.value)} placeholder="Asset Tag" className="w-full rounded-xl border px-4 py-3 text-sm" />
+              <input value={serialNumber} onChange={(e) => setSerialNumber(e.target.value)} placeholder="Serial Number" className="w-full rounded-xl border px-4 py-3 text-sm" />
+              <input value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)} placeholder="Room Number" className="w-full rounded-xl border px-4 py-3 text-sm" />
+            </div>
+          </div>
+
+          <div>
+            <div className={sectionTitle}>Status Change</div>
+            <select value={statusChange} onChange={(e) => setStatusChange(e.target.value)} className="mt-2 w-full rounded-xl border px-4 py-3 text-sm text-slate-700">
+              {statusOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 pt-2">
+            <button onClick={() => saveUpdate('live')} className="rounded-xl bg-slate-900 px-3 py-3 text-xs font-semibold text-white">Save</button>
+            <button onClick={() => saveUpdate('offline')} className="rounded-xl border px-3 py-3 text-xs font-semibold text-slate-700">Offline</button>
+            <button onClick={() => setScreen('detail')} className="rounded-xl border px-3 py-3 text-xs font-semibold text-slate-700">Cancel</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderSettings() {
+    return (
+      <div className={phoneShell}>
+        <div className="border-b px-4 py-4">
+          <div className="font-bold">Settings / Demo Tools</div>
+          <div className="text-xs text-slate-500">Standalone workflow mode</div>
+        </div>
+
+        <div className="space-y-4 p-4">
+          <div className={`${card} p-4 text-sm text-slate-700`}>
+            <div className="font-semibold text-slate-900">Status</div>
+            <div className="mt-2">{syncMessage}</div>
+            <div className="mt-1">Offline queue: {offlineQueue}</div>
+            <div className="mt-1">Saved locally in browser storage</div>
+          </div>
+
+          <div className={`${card} p-4 text-sm text-slate-700`}>
+            <div className="font-semibold text-slate-900">What Useful V1 Does</div>
+            <div className="mt-2">• Multiple realistic tickets</div>
+            <div>• Search and status filters</div>
+            <div>• Group by campus view</div>
+            <div>• Ticket detail and notes</div>
+            <div>• Quick actions with local persistence</div>
+            <div>• Offline queue simulation</div>
+          </div>
+
+          <button onClick={syncOfflineQueue} className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">Clear Offline Queue</button>
+          <button onClick={resetDemoData} className="w-full rounded-xl border px-4 py-3 text-sm font-semibold text-slate-700">Reset Demo Data</button>
+          <button onClick={() => setScreen('tickets')} className="w-full rounded-xl border px-4 py-3 text-sm font-semibold text-slate-700">Back to Tickets</button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderScreen() {
+    if (screen === 'detail') return renderDetail();
+    if (screen === 'update') return renderUpdate();
+    if (screen === 'settings') return renderSettings();
+    return renderTickets();
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-100 p-6">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-slate-900">Field Tech App — Useful V1</h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Standalone first: realistic tickets, usable quick actions, and local persistence before any TOPdesk integration.
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[400px_1fr]">
+          <div>{renderScreen()}</div>
+
+          <div className="space-y-4">
+            <div className={`${card} p-5`}>
+              <div className="text-lg font-bold text-slate-900">What Changed</div>
+              <div className="mt-3 space-y-2 text-sm text-slate-700">
+                <div>• 5 realistic sample tickets</div>
+                <div>• Search and filterable list</div>
+                <div>• By-campus queue view</div>
+                <div>• Detail screen with note history</div>
+                <div>• Quick-action update workflow</div>
+                <div>• Local browser storage persistence</div>
+                <div>• Offline queue simulation</div>
+              </div>
+            </div>
+
+            <div className={`${card} p-5`}>
+              <div className="text-lg font-bold text-slate-900">Best Next Layer After This</div>
+              <div className="mt-3 space-y-2 text-sm text-slate-700">
+                <div>1. Convert this logic into your real deployable index.html</div>
+                <div>2. Add install prompt + manifest + service worker cleanly</div>
+                <div>3. Hook ticket data to TOPdesk API later</div>
+              </div>
+            </div>
+
+            <div className={`${card} p-5`}>
+              <div className="text-lg font-bold text-slate-900">Current Ticket</div>
+              <div className="mt-3 text-sm text-slate-700">{selectedTicket?.id}</div>
+              <div className="mt-1 text-sm text-slate-700">{selectedTicket?.requester}</div>
+              <div className="mt-1 text-sm text-slate-700">{selectedTicket?.campus}</div>
+              <div className="mt-1 text-sm text-slate-700">Status: {selectedTicket?.status}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
