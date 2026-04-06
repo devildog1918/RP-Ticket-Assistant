@@ -51,7 +51,7 @@
       background: #fff;
       box-shadow: var(--shadow);
       position: relative;
-       overflow-x: hidden;
+       overflow-x: hidden;  /* keeps page clean */
     }
 
     .topbar{
@@ -100,7 +100,7 @@
 
     .screen {
   padding: 14px 14px 92px;
-  overflow-x: visible;
+  overflow-x: visible;   /* 👈 ADD THIS */
 }
 
     .search-box, .field-input, .field-select, .field-textarea{
@@ -120,23 +120,14 @@
 
   .chips-wrap {
       width: 100%;
-      overflow-x: auto;
-      overflow-y: hidden;
       margin-top: 12px;
-      padding-bottom: 2px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    .chips-wrap::-webkit-scrollbar {
-      display: none;
     }
 
     .chips-track {
-      display: inline-flex;
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
-      width: max-content;
-      min-width: 100%;
+      width: 100%;
       padding: 2px 1px 2px;
     }
 
