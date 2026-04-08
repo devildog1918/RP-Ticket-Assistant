@@ -2,1119 +2,1578 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Field Tech App</title>
-  <link rel="manifest" href="./manifest.json" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Field Tech" />
+  <title>RP Ticket Assistant</title>
   <style>
-    :root{
-      --bg:#f1f5f9;
-      --card:#ffffff;
-      --line:#dbe3ea;
-      --text:#0f172a;
-      --muted:#64748b;
-      --brand:#0f172a;
-      --soft:#f8fafc;
-      --success:#166534;
-      --success-bg:#dcfce7;
-      --warn:#92400e;
-      --warn-bg:#fef3c7;
-      --new:#1d4ed8;
-      --new-bg:#dbeafe;
-      --wait:#9a3412;
-      --wait-bg:#ffedd5;
-      --danger:#991b1b;
-      --danger-bg:#fee2e2;
-      --radius:18px;
-      --shadow:0 10px 30px rgba(15,23,42,.08);
+    :root {
+      --bg: #0b1220;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --panel-3: #0f172a;
+      --line: #334155;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.28);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --header-h: 64px;
+      --nav-h: 78px;
+      --max-w: 980px;
+      --font: Inter, Roboto, Arial, sans-serif;
     }
 
     * { box-sizing: border-box; }
-
     html, body {
       margin: 0;
       padding: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: var(--font);
+      min-height: 100%;
     }
 
-    body { min-height: 100vh; }
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 0;
+    }
 
-    .phone-shell{
-      max-width: 430px;
+    .app {
+      width: 100%;
+      max-width: var(--max-w);
       min-height: 100vh;
-      margin: 0 auto;
-      background: #fff;
-      box-shadow: var(--shadow);
+      background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
       position: relative;
-       overflow-x: hidden;  /* keeps page clean */
     }
 
-    .topbar{
-      background: var(--brand);
-      color: #fff;
-      padding: 16px;
+    .topbar {
       position: sticky;
       top: 0;
-      z-index: 30;
-    }
-
-    .topbar-row{
+      z-index: 20;
+      height: var(--header-h);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      padding: 12px 16px;
+      background: rgba(11, 18, 32, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
     }
 
-    .app-title{
-      margin: 0;
-      font-size: 20px;
-      font-weight: 700;
+    .brand-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
-    .app-subtitle{
-      margin-top: 3px;
-      font-size: 12px;
-      color: #cbd5e1;
+    .brand {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
     }
 
-    .icon-btn, .primary-btn, .secondary-btn, .chip, .toggle-btn, .small-btn, .nav-btn, .action-btn{
-      font: inherit;
-      border: none;
+    .subbrand {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .icon-btn, .btn {
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
       cursor: pointer;
+      font: inherit;
+      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
     }
 
-    .icon-btn{
+    .icon-btn:active, .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn.primary {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.28);
+      color: #d8f3ff;
+    }
+
+    .btn.good {
+      background: rgba(34, 197, 94, 0.14);
+      border-color: rgba(34, 197, 94, 0.28);
+      color: #dcfce7;
+    }
+
+    .btn.warn {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.28);
+      color: #fef3c7;
+    }
+
+    .btn.danger {
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.28);
+      color: #fee2e2;
+    }
+
+    .btn.ghost {
       background: transparent;
-      color: #fff;
-      border: 1px solid rgba(255,255,255,.25);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 12px;
-      font-weight: 700;
     }
 
     .screen {
-  padding: 14px 14px 92px;
-  overflow-x: visible;   /* 👈 ADD THIS */
-}
-
-    .search-box, .field-input, .field-select, .field-textarea{
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 13px 14px;
-      font-size: 14px;
-      background: #fff;
-      outline: none;
+      display: none;
+      padding: 16px;
+      padding-bottom: calc(var(--nav-h) + 28px);
     }
 
-    .search-box:focus, .field-input:focus, .field-select:focus, .field-textarea:focus{
-      border-color: #94a3b8;
-      box-shadow: 0 0 0 3px rgba(148,163,184,.18);
-    }
-
-  .chips-wrap {
-      width: 100%;
-      margin-top: 12px;
-    }
-
-    .chips-track {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      width: 100%;
-      padding: 2px 1px 2px;
-    }
-
-    .chip {
-      flex: 0 0 auto;
-      white-space: nowrap;
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .chip.active{
-      background: var(--brand);
-      color: #fff;
-      border-color: var(--brand);
-    }
-
-    .toggle-row{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .toggle-btn{
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .toggle-btn.active{
-      background: var(--brand);
-      color: #fff;
-      border-color: var(--brand);
-    }
-
-    .summary-strip{
-      margin-top: 12px;
-      background: var(--soft);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .card{
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: 0 1px 2px rgba(15,23,42,.03);
-    }
-
-    .card + .card{ margin-top: 12px; }
-
-    .ticket-card{ cursor: pointer; }
-
-    .ticket-top{
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .ticket-id{
-      margin: 0;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .badge-stack{
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .badge{
-      font-size: 10px;
-      font-weight: 700;
-      padding: 4px 7px;
-      border-radius: 999px;
-    }
-
-    .status-new{ color: var(--new); background: var(--new-bg); }
-    .status-in-progress{ color: var(--warn); background: var(--warn-bg); }
-    .status-waiting{ color: var(--wait); background: var(--wait-bg); }
-    .status-resolved{ color: var(--success); background: var(--success-bg); }
-
-    .priority-high{ color: var(--danger); background: var(--danger-bg); }
-    .priority-medium{ color: var(--wait); background: var(--wait-bg); }
-    .priority-low{ color: #374151; background: #e5e7eb; }
-
-    .ticket-user{
-      margin-top: 10px;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .ticket-meta{
-      margin-top: 3px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-
-    .ticket-summary{
-      margin-top: 10px;
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .ticket-footer{
-      margin-top: 12px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .section-label{
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .detail-grid{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px 12px;
-      font-size: 13px;
-    }
-
-    .detail-grid strong{
+    .screen.active {
       display: block;
-      margin-top: 3px;
-      font-size: 14px;
-      color: var(--text);
     }
 
-    .detail-text{
-      font-size: 14px;
-      line-height: 1.55;
+    .section {
+      margin-bottom: 18px;
     }
 
-    .note{
-      border-radius: 14px;
-      background: var(--soft);
+    .section-title {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0 0 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .card + .card { margin-top: 12px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(17, 24, 39, 0.95));
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: var(--radius-sm);
       padding: 12px;
-      border: 1px solid var(--line);
     }
 
-    .note + .note{ margin-top: 10px; }
-
-    .note-meta{
-      font-size: 11px;
+    .stat-label {
+      font-size: 0.78rem;
       color: var(--muted);
       margin-bottom: 6px;
     }
 
-    .note-body{
-      font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-line;
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 800;
     }
 
-    .field-block{ margin-top: 14px; }
-
-    .field-label{
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      margin-bottom: 8px;
+    .filters {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
     }
 
-    .field-textarea{
-      min-height: 132px;
+    .filters::-webkit-scrollbar { display: none; }
+
+    .chip {
+      white-space: nowrap;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .chip.active {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.16);
+      color: #d8f3ff;
+    }
+
+    .search-wrap {
+      display: flex;
+      gap: 8px;
+    }
+
+    .input, .textarea, .select {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(15, 23, 42, 0.92);
+      color: var(--text);
+      padding: 12px 13px;
+      font: inherit;
+    }
+
+    .textarea {
+      min-height: 110px;
       resize: vertical;
-      font-family: Arial, Helvetica, sans-serif;
     }
 
-    .grid-2{
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    .grid-3{
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+    .ticket-list {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
 
-    .primary-btn{
-      width: 100%;
-      background: var(--brand);
-      color: #fff;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      font-weight: 700;
+    .ticket {
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
     }
 
-    .secondary-btn{
-      width: 100%;
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--line);
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 14px;
-      font-weight: 700;
+    .ticket-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 10px;
     }
 
-    .small-btn{
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--line);
-      padding: 9px 12px;
+    .ticket-id {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .ticket-title {
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .ticket-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: rgba(31, 41, 55, 0.8);
+      color: #dbeafe;
+    }
+
+    .pill.status-New { color: #dbeafe; }
+    .pill.status-Active { color: #dcfce7; }
+    .pill.status-Waiting { color: #fef3c7; }
+    .pill.status-Scheduled { color: #e9d5ff; }
+    .pill.status-Complete, .pill.status-Closed { color: #e5e7eb; }
+
+    .tiny {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .detail-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-item {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.1);
       border-radius: 12px;
-      font-size: 12px;
+      padding: 10px;
+    }
+
+    .info-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .info-value {
+      font-size: 0.95rem;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .action-btn {
+      text-align: left;
+      min-height: 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .action-title {
       font-weight: 700;
+      font-size: 0.93rem;
     }
 
-    .small-btn.active{
-      background: var(--brand);
-      color: #fff;
-      border-color: var(--brand);
+    .action-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
     }
 
-    .campus-ticket{
-      border: 1px solid var(--line);
+    .timeline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .timeline-step {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.84);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .timeline-step.active {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: rgba(56, 189, 248, 0.28);
+      color: #d8f3ff;
+    }
+
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .check-item {
+      display: flex;
+      gap: 10px;
+      align-items: start;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .check-item input {
+      margin-top: 3px;
+      transform: scale(1.15);
+    }
+
+    .blurb-box {
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.16);
       border-radius: 14px;
       padding: 12px;
-      background: #fff;
-      cursor: pointer;
-      margin-top: 10px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      font-size: 0.94rem;
     }
 
-    .campus-group-title{
-      margin: 0 0 10px;
-      font-size: 14px;
-      font-weight: 700;
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    .empty{
+    .note {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .note-meta {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .quick-btn {
+      min-height: 88px;
+      font-size: 1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .empty-state {
       text-align: center;
       color: var(--muted);
-      font-size: 14px;
-      padding: 22px 10px;
+      padding: 24px 10px;
+      border: 1px dashed rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
     }
 
-    .bottom-actions{
+    .bottom-nav {
       position: fixed;
-      bottom: 58px;
       left: 50%;
       transform: translateX(-50%);
-      width: min(430px, 100%);
-      background: #fff;
-      border-top: 1px solid var(--line);
-      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-      z-index: 25;
-    }
-
-    .action-btn{
-      border-radius: 12px;
-      padding: 10px 6px;
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--line);
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1.2;
-      min-height: 52px;
-    }
-
-    .action-btn.primary{
-      background: var(--brand);
-      color: #fff;
-      border-color: var(--brand);
-    }
-
-    .bottom-nav{
-      position: fixed;
       bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(430px, 100%);
+      width: 100%;
+      max-width: var(--max-w);
+      z-index: 25;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(11,18,32,0) 0%, rgba(11,18,32,0.95) 28%, rgba(11,18,32,0.98) 100%);
+    }
+
+    .bottom-nav-inner {
+      background: rgba(17, 24, 39, 0.94);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: 18px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      border-top: 1px solid var(--line);
-      background: #fff;
-      z-index: 26;
-      padding-bottom: env(safe-area-inset-bottom);
+      gap: 8px;
+      padding: 8px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
     }
 
-    .nav-btn{
-      background: #fff;
+    .nav-btn {
+      border: 0;
+      background: transparent;
       color: var(--muted);
-      padding: 11px 8px;
-      font-size: 12px;
-      font-weight: 700;
+      font: inherit;
+      padding: 10px 6px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: center;
+      justify-content: center;
     }
 
-    .nav-btn.active{ color: var(--text); }
-
-    .helper-text{
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.45;
+    .nav-btn.active {
+      background: rgba(56, 189, 248, 0.14);
+      color: #d8f3ff;
     }
 
-    @media (max-width: 380px){
-      .grid-2, .grid-3{ grid-template-columns: 1fr; }
-      .bottom-actions{ grid-template-columns: repeat(3, 1fr); }
+    .nav-ico { font-size: 1.1rem; }
+    .nav-label { font-size: 0.72rem; }
+
+    .toast {
+      position: fixed;
+      top: 78px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-12px);
+      background: rgba(17, 24, 39, 0.96);
+      border: 1px solid rgba(56, 189, 248, 0.26);
+      color: #d8f3ff;
+      padding: 12px 14px;
+      border-radius: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.18s ease;
+      z-index: 50;
+      box-shadow: var(--shadow);
+      max-width: calc(100% - 24px);
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (min-width: 760px) {
+      .stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .quick-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .actions-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .row, .info-grid, .actions-grid, .quick-grid { grid-template-columns: 1fr; }
+      .ticket-top, .detail-head { flex-direction: column; }
     }
   </style>
 </head>
 <body>
-  <div class="phone-shell">
-    <div id="topbar" class="topbar"></div>
-    <div id="screen" class="screen"></div>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <div class="brand">RP Ticket Assistant</div>
+        <div class="subbrand">Personal workflow tool for all ticket categories</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="resetDemoBtn" title="Reset demo data">Reset</button>
+        <button class="btn primary" id="newTicketBtn">+ Ticket</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="screen active" id="screen-dashboard">
+        <div class="section">
+          <p class="section-title">Overview</p>
+          <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Filter by category</p>
+          <div class="filters" id="categoryFilters"></div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Find ticket</p>
+          <div class="search-wrap">
+            <input class="input" id="searchInput" type="text" placeholder="Search ID, user, summary, category, campus..." />
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">My tickets</p>
+          <div class="ticket-list" id="ticketList"></div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-detail">
+        <div class="section">
+          <div class="card">
+            <div class="detail-head">
+              <div>
+                <div class="ticket-id" id="detailTicketId">—</div>
+                <div class="detail-title" id="detailTitle">Select a ticket</div>
+                <div class="tiny" id="detailSubtitle">—</div>
+              </div>
+              <button class="btn ghost" id="backToDashboardBtn">← Back</button>
+            </div>
+            <div class="info-grid" id="detailInfoGrid"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Workflow</p>
+          <div class="card">
+            <div class="timeline" id="timeline"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Actions</p>
+          <div class="actions-grid" id="actionsGrid"></div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Checklist</p>
+          <div class="card">
+            <div class="checklist" id="checklist"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Blurb</p>
+          <div class="card stack">
+            <div class="row">
+              <div>
+                <label class="tiny" for="varDate">Date</label>
+                <input class="input" id="varDate" type="date" />
+              </div>
+              <div>
+                <label class="tiny" for="varDevice">Device</label>
+                <input class="input" id="varDevice" type="text" placeholder="Device or item" />
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label class="tiny" for="varMtn">MTN / Ref</label>
+                <input class="input" id="varMtn" type="text" placeholder="Phone, asset, or reference" />
+              </div>
+              <div>
+                <label class="tiny" for="varBudget">Budget / Note</label>
+                <input class="input" id="varBudget" type="text" placeholder="Budget code or short note" />
+              </div>
+            </div>
+            <div class="blurb-box" id="blurbPreview">No blurb available.</div>
+            <div class="row">
+              <button class="btn primary" id="copyBlurbBtn">Copy Blurb</button>
+              <button class="btn" id="addBlurbAsNoteBtn">Add Blurb to Notes</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Notes</p>
+          <div class="card stack">
+            <textarea class="textarea" id="noteInput" placeholder="Add a note, reminder, status update, or call summary..."></textarea>
+            <div class="row">
+              <button class="btn primary" id="saveNoteBtn">Save Note</button>
+              <button class="btn" id="clearNoteBtn">Clear</button>
+            </div>
+            <div class="notes-list" id="notesList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-quick">
+        <div class="section">
+          <p class="section-title">Quick actions</p>
+          <div class="quick-grid">
+            <button class="btn primary quick-btn quick-action" data-step="Order Submitted">📦 Order Submitted</button>
+            <button class="btn good quick-btn quick-action" data-step="Received">🚚 Item Received</button>
+            <button class="btn warn quick-btn quick-action" data-step="Ready for Pickup / Interoffice">📅 Ready / Schedule</button>
+            <button class="btn good quick-btn quick-action" data-step="Completed">✅ Completed</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Apply to selected ticket</p>
+          <div class="card stack">
+            <select class="select" id="quickTicketSelect"></select>
+            <div class="tiny">Pick a ticket, then use the big buttons above.</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">Quick search</p>
+          <div class="card stack">
+            <input class="input" id="quickSearchInput" type="text" placeholder="Find and open a ticket fast..." />
+            <div class="ticket-list" id="quickSearchResults"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-manage">
+        <div class="section">
+          <p class="section-title">New ticket</p>
+          <div class="card stack">
+            <div class="row">
+              <div>
+                <label class="tiny" for="newSummary">Summary</label>
+                <input class="input" id="newSummary" type="text" placeholder="Short ticket summary" />
+              </div>
+              <div>
+                <label class="tiny" for="newRequestor">Requestor</label>
+                <input class="input" id="newRequestor" type="text" placeholder="Name" />
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label class="tiny" for="newCategory">Category</label>
+                <select class="select" id="newCategory"></select>
+              </div>
+              <div>
+                <label class="tiny" for="newSubcategory">Subcategory</label>
+                <input class="input" id="newSubcategory" type="text" placeholder="Upgrade, Printer, Form, Badge..." />
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label class="tiny" for="newCampus">Campus / Location</label>
+                <input class="input" id="newCampus" type="text" placeholder="Location" />
+              </div>
+              <div>
+                <label class="tiny" for="newPriority">Priority</label>
+                <select class="select" id="newPriority">
+                  <option>Low</option>
+                  <option selected>Normal</option>
+                  <option>High</option>
+                  <option>Urgent</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label class="tiny" for="newAssigned">Assigned To</label>
+                <input class="input" id="newAssigned" type="text" placeholder="Tech or group" />
+              </div>
+              <div>
+                <label class="tiny" for="newRef">Phone / Asset / Ref</label>
+                <input class="input" id="newRef" type="text" placeholder="MTN, badge ID, asset, etc." />
+              </div>
+            </div>
+            <button class="btn primary" id="createTicketBtn">Create Ticket</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="section-title">About</p>
+          <div class="card">
+            <div class="stack">
+              <div>This version is local-first and stores data in your browser with <strong>localStorage</strong>.</div>
+              <div>Add your manifest, service worker, and icons later to make it installable as a full PWA.</div>
+              <div>Cellular is preloaded as the first workflow, but the app already supports multiple categories.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <button class="nav-btn active" data-screen="dashboard">
+          <span class="nav-ico">🏠</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+        <button class="nav-btn" data-screen="detail">
+          <span class="nav-ico">🎫</span>
+          <span class="nav-label">Detail</span>
+        </button>
+        <button class="nav-btn" data-screen="quick">
+          <span class="nav-ico">⚡</span>
+          <span class="nav-label">Quick</span>
+        </button>
+        <button class="nav-btn" data-screen="manage">
+          <span class="nav-ico">🛠️</span>
+          <span class="nav-label">Manage</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="toast" id="toast"></div>
   </div>
 
   <script>
-    const STORAGE_KEY = "field-tech-useful-v1";
-    const APP_VERSION = "Useful V1";
-    const CACHE_VERSION = "ft-useful-v1";
+    const STORAGE_KEY = 'rp-ticket-assistant-data-v1';
 
-    const DEFAULT_TICKETS = [
-      {
-        id: "I2604-01234",
-        status: "In Progress",
-        priority: "High",
-        requester: "John Smith",
-        phone: "281-555-0187",
-        email: "john.smith@example.org",
-        campus: "Morton Ranch High School",
-        room: "214",
-        category: "Classroom Tech",
-        subcategory: "Display Issue",
-        summary: "Teacher laptop not connecting to projector",
-        opened: "2026-04-05 08:14",
-        updated: "2026-04-05 10:42",
-        assignedTech: "Rob Example",
-        assignedGroup: "Field Support",
-        notes: [
-          { time: "2026-04-05 10:42", tech: "Rob Example", body: "Technician arrived on site and began troubleshooting." },
-          { time: "2026-04-05 09:57", tech: "Dispatch", body: "Assigned to field technician." }
-        ]
-      },
-      {
-        id: "I2604-01241",
-        status: "New",
-        priority: "Medium",
-        requester: "Lisa Perez",
-        phone: "281-555-0139",
-        email: "lisa.perez@example.org",
-        campus: "ESC",
-        room: "2790",
-        category: "Badge Services",
-        subcategory: "Printer Issue",
-        summary: "Badge printer not feeding correctly",
-        opened: "2026-04-05 08:48",
-        updated: "2026-04-05 09:18",
-        assignedTech: "Rob Example",
-        assignedGroup: "Field Support",
-        notes: [
-          { time: "2026-04-05 09:18", tech: "Help Desk", body: "Ticket created and routed to field support." }
-        ]
-      },
-      {
-        id: "I2604-01256",
-        status: "Waiting",
-        priority: "Low",
-        requester: "Mark Zahn",
-        phone: "281-555-0172",
-        email: "mark.zahn@example.org",
-        campus: "Maintenance",
-        room: "Front Office",
-        category: "Cellular Devices",
-        subcategory: "Pickup",
-        summary: "Cell phone setup pending pickup",
-        opened: "2026-04-04 14:10",
-        updated: "2026-04-04 15:32",
-        assignedTech: "Rob Example",
-        assignedGroup: "Field Support",
-        notes: [
-          { time: "2026-04-04 15:32", tech: "Rob Example", body: "Waiting on user pickup confirmation." }
-        ]
-      },
-      {
-        id: "I2604-01262",
-        status: "New",
-        priority: "High",
-        requester: "Amy Brooks",
-        phone: "281-555-0105",
-        email: "amy.brooks@example.org",
-        campus: "Taylor High School",
-        room: "Library",
-        category: "Wireless",
-        subcategory: "Access Point",
-        summary: "Library Chromebook cart losing Wi-Fi connection",
-        opened: "2026-04-05 11:05",
-        updated: "2026-04-05 11:05",
-        assignedTech: "Rob Example",
-        assignedGroup: "Field Support",
-        notes: []
-      },
-      {
-        id: "I2604-01270",
-        status: "Waiting",
-        priority: "Medium",
-        requester: "Daniel Ramirez",
-        phone: "281-555-0168",
-        email: "daniel.ramirez@example.org",
-        campus: "Police - Security",
-        room: "Desk 3",
-        category: "Cellular Devices",
-        subcategory: "Upgrade",
-        summary: "Replacement phone staged; waiting on pickup appointment",
-        opened: "2026-04-05 07:42",
-        updated: "2026-04-05 09:50",
-        assignedTech: "Rob Example",
-        assignedGroup: "Field Support",
-        notes: [
-          { time: "2026-04-05 09:50", tech: "Rob Example", body: "Device configured and ready for pickup scheduling." }
-        ]
-      }
-    ];
+    const universalStatuses = ['New', 'Active', 'Waiting', 'Scheduled', 'Complete', 'Closed'];
 
-    const QUICK_ACTIONS = {
-      "On Site": {
-        body: "Technician arrived on site and began troubleshooting.",
-        status: "In Progress"
-      },
-      "Contacted User": {
-        body: "Contacted user and reviewed reported issue.",
-        status: "In Progress"
-      },
-      "Waiting on User": {
-        body: "Waiting on user response or availability.",
-        status: "Waiting"
-      },
-      "Waiting on Part": {
-        body: "Waiting on required equipment or part to continue.",
-        status: "Waiting"
-      },
-      "Resolved": {
-        body: "Issue resolved and functionality confirmed.",
-        status: "Resolved"
-      },
-      "Working Note": {
-        body: "Troubleshooting is in progress.",
-        status: "In Progress"
-      }
-    };
-
-    const state = {
-      screen: "tickets",
-      tickets: [],
-      selectedTicketId: null,
-      search: "",
-      activeFilter: "All",
-      viewMode: "list",
-      selectedAction: "Working Note",
-      updateText: QUICK_ACTIONS["Working Note"].body,
-      statusChange: QUICK_ACTIONS["Working Note"].status,
-      assetTag: "",
-      serialNumber: "",
-      roomNumber: "",
-      offlineQueue: 0,
-      syncMessage: "Local mode ready",
-      deferredPrompt: null
-    };
-
-    function clone(value){
-      return JSON.parse(JSON.stringify(value));
-    }
-
-    function selectedTicket(){
-      return state.tickets.find(t => t.id === state.selectedTicketId) || null;
-    }
-
-    function persistState(){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        tickets: state.tickets,
-        offlineQueue: state.offlineQueue
-      }));
-    }
-
-    function loadState(){
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if(saved){
-        try{
-          const parsed = JSON.parse(saved);
-          state.tickets = Array.isArray(parsed.tickets) && parsed.tickets.length ? parsed.tickets : clone(DEFAULT_TICKETS);
-          state.offlineQueue = typeof parsed.offlineQueue === "number" ? parsed.offlineQueue : 0;
-          state.syncMessage = "Loaded saved local data";
-        }catch(error){
-          state.tickets = clone(DEFAULT_TICKETS);
-          state.offlineQueue = 0;
-          state.syncMessage = "Could not read saved data";
+    const categoryConfig = {
+      'Cellular Devices': {
+        steps: [
+          'Request',
+          'Pending Approval',
+          'Approved',
+          'Order Submitted',
+          'Shipped',
+          'Received',
+          'Processing',
+          'Ready for Pickup / Interoffice',
+          'Completed'
+        ],
+        checklist: {
+          'Request': ['Review request details', 'Confirm line type or device need', 'Verify requester and department'],
+          'Pending Approval': ['Verify approval requirement', 'Confirm any budget or department approval', 'Set follow-up reminder'],
+          'Approved': ['Approval confirmed', 'Validate device choice', 'Prepare order details'],
+          'Order Submitted': ['Order emailed/submitted', 'Budget code captured if needed', 'Stakeholders copied if needed'],
+          'Shipped': ['Tracking available', 'Expected arrival noted', 'Prepare receiving steps'],
+          'Received': ['Device physically received', 'Match item to ticket', 'Check for accessories or case'],
+          'Processing': ['Update software/setup', 'Label device if needed', 'Prepare pickup or delivery'],
+          'Ready for Pickup / Interoffice': ['Notify user or department', 'Confirm pickup/interoffice method', 'Prepare sign-out/invoice if needed'],
+          'Completed': ['Old device received if required', 'Final note added', 'Ticket ready to close']
+        },
+        blurbs: {
+          'Request': 'Request received for [DEVICE]. Initial review is in progress. Reference: [MTN].',
+          'Pending Approval': 'This request is pending required approval before the order can move forward. Follow-up date: [DATE]. Note: [BUDGET].',
+          'Approved': 'Approval has been confirmed for [DEVICE]. Order preparation is complete and submission is the next step.',
+          'Order Submitted': 'The order for [DEVICE] has been submitted on [DATE]. Reference: [MTN]. Additional note: [BUDGET].',
+          'Shipped': 'The requested item has shipped. Continue to monitor delivery and update the ticket upon receipt. Reference: [MTN].',
+          'Received': 'The requested item has been received on [DATE]. Processing and setup will be completed before release to the user.',
+          'Processing': 'Processing is underway for [DEVICE]. Setup, updates, and any required configuration are being completed.',
+          'Ready for Pickup / Interoffice': '[DEVICE] is ready as of [DATE]. Coordinate pickup or interoffice delivery. Reference: [MTN].',
+          'Completed': 'Work for this request has been completed. Final item: [DEVICE]. Completion date: [DATE]. Reference: [MTN].'
         }
-      }else{
-        state.tickets = clone(DEFAULT_TICKETS);
+      },
+      'ID Badges': {
+        steps: ['Request', 'Photo / Verification', 'Printed', 'Ready for Pickup', 'Completed'],
+        checklist: {
+          'Request': ['Verify badge request details', 'Confirm employee/student info'],
+          'Photo / Verification': ['Capture or verify photo', 'Validate required identity details'],
+          'Printed': ['Badge printed', 'Print quality checked'],
+          'Ready for Pickup': ['Notify user', 'Prepare pickup/sign-out'],
+          'Completed': ['Badge delivered or picked up', 'Final note added']
+        },
+        blurbs: {
+          'Request': 'Badge request received and under review.',
+          'Photo / Verification': 'Photo and identity verification are in progress for this badge request.',
+          'Printed': 'The badge has been printed and is being prepared for release.',
+          'Ready for Pickup': 'The badge is ready for pickup as of [DATE].',
+          'Completed': 'Badge request completed on [DATE].'
+        }
+      },
+      'SoftDocs': {
+        steps: ['Request', 'Needs Clarification', 'Assigned', 'Testing', 'Completed'],
+        checklist: {
+          'Request': ['Review issue summary', 'Confirm requester details'],
+          'Needs Clarification': ['Identify missing details', 'Contact requester'],
+          'Assigned': ['Assigned to correct specialist', 'Set next follow-up'],
+          'Testing': ['Validate issue or fix', 'Document results'],
+          'Completed': ['User informed', 'Final note entered']
+        },
+        blurbs: {
+          'Request': 'SoftDocs request received and initial review is underway.',
+          'Needs Clarification': 'Additional information is required before this SoftDocs request can proceed. Follow-up date: [DATE].',
+          'Assigned': 'This SoftDocs request has been assigned for review and resolution.',
+          'Testing': 'Testing is in progress for this SoftDocs request.',
+          'Completed': 'SoftDocs request completed on [DATE].'
+        }
+      },
+      'General Support': {
+        steps: ['Request', 'In Progress', 'Waiting on User', 'Scheduled', 'Resolved', 'Closed'],
+        checklist: {
+          'Request': ['Review issue details', 'Confirm scope and urgency'],
+          'In Progress': ['Troubleshooting started', 'Document work performed'],
+          'Waiting on User': ['User contacted', 'Waiting for reply or action'],
+          'Scheduled': ['Appointment or visit scheduled', 'Time confirmed'],
+          'Resolved': ['Issue resolved', 'User informed'],
+          'Closed': ['Closure documented', 'No further action required']
+        },
+        blurbs: {
+          'Request': 'General support request received and under review.',
+          'In Progress': 'Work is in progress on this request.',
+          'Waiting on User': 'This request is waiting on user response or action as of [DATE].',
+          'Scheduled': 'Work for this request has been scheduled for [DATE].',
+          'Resolved': 'The reported issue has been resolved.',
+          'Closed': 'This ticket has been closed on [DATE].'
+        }
       }
-      state.selectedTicketId = state.tickets[0] ? state.tickets[0].id : null;
+    };
+
+    const demoData = {
+      selectedTicketId: 'RP-1001',
+      activeCategoryFilter: 'All',
+      tickets: [
+        {
+          id: 'RP-1001',
+          summary: 'iPhone upgrade for transportation admin',
+          requestor: 'Tina Alvarez',
+          category: 'Cellular Devices',
+          subcategory: 'Upgrade',
+          campus: 'ESC',
+          priority: 'Normal',
+          assignedTo: 'Rob',
+          reference: '832-555-0144',
+          universalStatus: 'Active',
+          workflowStep: 'Order Submitted',
+          nextAction: 'Watch for shipment and update ticket on receipt',
+          updatedAt: isoNow(),
+          notes: [
+            { at: isoNow(-1), text: 'Upgrade approved and order prepared.' },
+            { at: isoNow(-0.5), text: 'Order submitted to vendor.' }
+          ],
+          checklistState: {
+            'Order Submitted': [true, true, false]
+          }
+        },
+        {
+          id: 'RP-1002',
+          summary: 'Staff badge replacement',
+          requestor: 'Sandra King',
+          category: 'ID Badges',
+          subcategory: 'Replacement',
+          campus: 'Morton Ranch HS',
+          priority: 'High',
+          assignedTo: 'Rob',
+          reference: 'Badge-2841',
+          universalStatus: 'Scheduled',
+          workflowStep: 'Ready for Pickup',
+          nextAction: 'Notify user and complete pickup',
+          updatedAt: isoNow(-2),
+          notes: [
+            { at: isoNow(-2), text: 'Badge printed and awaiting pickup.' }
+          ],
+          checklistState: {}
+        },
+        {
+          id: 'RP-1003',
+          summary: 'SoftDocs form not loading for enrollment docs',
+          requestor: 'Patricia Gomez',
+          category: 'SoftDocs',
+          subcategory: 'Content Issue',
+          campus: 'Education Support Complex',
+          priority: 'Normal',
+          assignedTo: 'Applications Team',
+          reference: 'Form access issue',
+          universalStatus: 'Waiting',
+          workflowStep: 'Needs Clarification',
+          nextAction: 'Get exact form name and screenshots',
+          updatedAt: isoNow(-3),
+          notes: [
+            { at: isoNow(-3), text: 'Requested additional details from user.' }
+          ],
+          checklistState: {}
+        },
+        {
+          id: 'RP-1004',
+          summary: 'Teacher laptop not connecting to projector',
+          requestor: 'James Butler',
+          category: 'General Support',
+          subcategory: 'Classroom Support',
+          campus: 'Cinco Ranch JH',
+          priority: 'Normal',
+          assignedTo: 'Field Tech',
+          reference: 'Room 214',
+          universalStatus: 'Active',
+          workflowStep: 'In Progress',
+          nextAction: 'Visit room and test cable path',
+          updatedAt: isoNow(-4),
+          notes: [],
+          checklistState: {}
+        }
+      ]
+    };
+
+    let appState = loadState();
+
+    const els = {
+      screens: {
+        dashboard: document.getElementById('screen-dashboard'),
+        detail: document.getElementById('screen-detail'),
+        quick: document.getElementById('screen-quick'),
+        manage: document.getElementById('screen-manage')
+      },
+      navButtons: [...document.querySelectorAll('.nav-btn')],
+      statsGrid: document.getElementById('statsGrid'),
+      categoryFilters: document.getElementById('categoryFilters'),
+      ticketList: document.getElementById('ticketList'),
+      searchInput: document.getElementById('searchInput'),
+      detailTicketId: document.getElementById('detailTicketId'),
+      detailTitle: document.getElementById('detailTitle'),
+      detailSubtitle: document.getElementById('detailSubtitle'),
+      detailInfoGrid: document.getElementById('detailInfoGrid'),
+      timeline: document.getElementById('timeline'),
+      actionsGrid: document.getElementById('actionsGrid'),
+      checklist: document.getElementById('checklist'),
+      varDate: document.getElementById('varDate'),
+      varDevice: document.getElementById('varDevice'),
+      varMtn: document.getElementById('varMtn'),
+      varBudget: document.getElementById('varBudget'),
+      blurbPreview: document.getElementById('blurbPreview'),
+      copyBlurbBtn: document.getElementById('copyBlurbBtn'),
+      addBlurbAsNoteBtn: document.getElementById('addBlurbAsNoteBtn'),
+      notesList: document.getElementById('notesList'),
+      noteInput: document.getElementById('noteInput'),
+      saveNoteBtn: document.getElementById('saveNoteBtn'),
+      clearNoteBtn: document.getElementById('clearNoteBtn'),
+      backToDashboardBtn: document.getElementById('backToDashboardBtn'),
+      quickTicketSelect: document.getElementById('quickTicketSelect'),
+      quickSearchInput: document.getElementById('quickSearchInput'),
+      quickSearchResults: document.getElementById('quickSearchResults'),
+      toast: document.getElementById('toast'),
+      newTicketBtn: document.getElementById('newTicketBtn'),
+      resetDemoBtn: document.getElementById('resetDemoBtn'),
+      newCategory: document.getElementById('newCategory'),
+      newSummary: document.getElementById('newSummary'),
+      newRequestor: document.getElementById('newRequestor'),
+      newSubcategory: document.getElementById('newSubcategory'),
+      newCampus: document.getElementById('newCampus'),
+      newPriority: document.getElementById('newPriority'),
+      newAssigned: document.getElementById('newAssigned'),
+      newRef: document.getElementById('newRef'),
+      createTicketBtn: document.getElementById('createTicketBtn')
+    };
+
+    initialize();
+
+    function initialize() {
+      populateCategorySelects();
+      setDefaultVars();
+      wireEvents();
+      renderAll();
+      showScreen('dashboard');
     }
 
-    function nowStamp(){
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      let hh = d.getHours();
-      const ampm = hh >= 12 ? "PM" : "AM";
-      hh = hh % 12 || 12;
-      const min = String(d.getMinutes()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd} ${hh}:${min} ${ampm}`;
+    function wireEvents() {
+      els.navButtons.forEach(btn => {
+        btn.addEventListener('click', () => showScreen(btn.dataset.screen));
+      });
+
+      els.searchInput.addEventListener('input', renderTicketList);
+      els.quickSearchInput.addEventListener('input', renderQuickSearchResults);
+      els.backToDashboardBtn.addEventListener('click', () => showScreen('dashboard'));
+
+      [els.varDate, els.varDevice, els.varMtn, els.varBudget].forEach(el => {
+        el.addEventListener('input', renderBlurbPreview);
+      });
+
+      els.copyBlurbBtn.addEventListener('click', copyCurrentBlurb);
+      els.addBlurbAsNoteBtn.addEventListener('click', addCurrentBlurbAsNote);
+      els.saveNoteBtn.addEventListener('click', saveManualNote);
+      els.clearNoteBtn.addEventListener('click', () => { els.noteInput.value = ''; });
+
+      document.querySelectorAll('.quick-action').forEach(btn => {
+        btn.addEventListener('click', () => quickApplyStep(btn.dataset.step));
+      });
+
+      els.quickTicketSelect.addEventListener('change', (e) => {
+        appState.selectedTicketId = e.target.value;
+        persist();
+        renderDetail();
+      });
+
+      els.newTicketBtn.addEventListener('click', () => showScreen('manage'));
+      els.resetDemoBtn.addEventListener('click', resetDemoData);
+      els.createTicketBtn.addEventListener('click', createTicket);
     }
 
-    function escapeHtml(str){
-      return String(str ?? "")
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#39;");
+    function renderAll() {
+      renderStats();
+      renderCategoryFilters();
+      renderTicketList();
+      renderDetail();
+      renderQuickSelect();
+      renderQuickSearchResults();
     }
 
-    function statusClass(status){
-      const key = String(status).toLowerCase().replace(/\s+/g, "-");
-      if(key === "in-progress") return "status-in-progress";
-      if(key === "waiting") return "status-waiting";
-      if(key === "resolved") return "status-resolved";
-      return "status-new";
+    function renderStats() {
+      const counts = universalStatuses.map(status => ({
+        status,
+        count: appState.tickets.filter(t => t.universalStatus === status).length
+      }));
+
+      els.statsGrid.innerHTML = counts.map(item => `
+        <div class="stat">
+          <div class="stat-label">${escapeHtml(item.status)}</div>
+          <div class="stat-value">${item.count}</div>
+        </div>
+      `).join('');
     }
 
-    function priorityClass(priority){
-      const key = String(priority).toLowerCase();
-      if(key === "high") return "priority-high";
-      if(key === "medium") return "priority-medium";
-      return "priority-low";
+    function renderCategoryFilters() {
+      const categories = ['All', ...Object.keys(categoryConfig)];
+      els.categoryFilters.innerHTML = categories.map(cat => `
+        <button class="chip ${appState.activeCategoryFilter === cat ? 'active' : ''}" data-category="${escapeHtml(cat)}">${escapeHtml(cat)}</button>
+      `).join('');
+
+      els.categoryFilters.querySelectorAll('.chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          appState.activeCategoryFilter = btn.dataset.category;
+          persist();
+          renderTicketList();
+          renderCategoryFilters();
+        });
+      });
     }
 
-    function filteredTickets(){
-      return state.tickets.filter(ticket => {
-        const q = state.search.trim().toLowerCase();
+    function renderTicketList() {
+      const term = els.searchInput.value.trim().toLowerCase();
+      const filtered = getFilteredTickets(term);
+
+      if (!filtered.length) {
+        els.ticketList.innerHTML = '<div class="empty-state">No tickets matched your current filter.</div>';
+        return;
+      }
+
+      els.ticketList.innerHTML = filtered.map(ticket => `
+        <div class="ticket" data-id="${ticket.id}">
+          <div class="ticket-top">
+            <div>
+              <div class="ticket-id">${escapeHtml(ticket.id)}</div>
+              <div class="ticket-title">${escapeHtml(ticket.summary)}</div>
+            </div>
+            <div class="pill status-${cssSafe(ticket.universalStatus)}">${escapeHtml(ticket.universalStatus)}</div>
+          </div>
+          <div class="ticket-meta">
+            <span class="pill">${escapeHtml(ticket.category)}</span>
+            <span class="pill">${escapeHtml(ticket.subcategory)}</span>
+            <span class="pill">${escapeHtml(ticket.workflowStep)}</span>
+          </div>
+          <div class="tiny">${escapeHtml(ticket.requestor)} • ${escapeHtml(ticket.campus)} • ${escapeHtml(ticket.priority)}</div>
+        </div>
+      `).join('');
+
+      els.ticketList.querySelectorAll('.ticket').forEach(card => {
+        card.addEventListener('click', () => {
+          appState.selectedTicketId = card.dataset.id;
+          persist();
+          renderDetail();
+          renderQuickSelect();
+          showScreen('detail');
+        });
+      });
+    }
+
+    function renderDetail() {
+      const ticket = getSelectedTicket();
+      if (!ticket) {
+        els.detailTicketId.textContent = '—';
+        els.detailTitle.textContent = 'No ticket selected';
+        els.detailSubtitle.textContent = 'Select a ticket from the dashboard or quick search.';
+        els.detailInfoGrid.innerHTML = '';
+        els.timeline.innerHTML = '';
+        els.actionsGrid.innerHTML = '';
+        els.checklist.innerHTML = '<div class="empty-state">No checklist available.</div>';
+        els.notesList.innerHTML = '<div class="empty-state">No notes yet.</div>';
+        els.blurbPreview.textContent = 'No blurb available.';
+        return;
+      }
+
+      els.detailTicketId.textContent = ticket.id;
+      els.detailTitle.textContent = ticket.summary;
+      els.detailSubtitle.textContent = `${ticket.requestor} • ${ticket.category} • ${ticket.workflowStep}`;
+
+      els.varDevice.value = els.varDevice.value || ticket.subcategory || ticket.summary;
+      els.varMtn.value = els.varMtn.value || ticket.reference || '';
+
+      const infoItems = [
+        ['Category', ticket.category],
+        ['Subcategory', ticket.subcategory],
+        ['Campus / Location', ticket.campus],
+        ['Priority', ticket.priority],
+        ['Assigned', ticket.assignedTo],
+        ['Universal Status', ticket.universalStatus],
+        ['Next Action', ticket.nextAction || '—'],
+        ['Reference', ticket.reference || '—']
+      ];
+
+      els.detailInfoGrid.innerHTML = infoItems.map(([label, value]) => `
+        <div class="info-item">
+          <div class="info-label">${escapeHtml(label)}</div>
+          <div class="info-value">${escapeHtml(value)}</div>
+        </div>
+      `).join('');
+
+      const config = categoryConfig[ticket.category];
+      const steps = config?.steps || [ticket.workflowStep];
+      els.timeline.innerHTML = steps.map(step => `
+        <div class="timeline-step ${step === ticket.workflowStep ? 'active' : ''}">${escapeHtml(step)}</div>
+      `).join('');
+
+      const currentIndex = steps.indexOf(ticket.workflowStep);
+      const nextSteps = steps.slice(currentIndex + 1, currentIndex + 4);
+      const actions = [
+        ticket.workflowStep,
+        ...nextSteps
+      ].filter((step, idx, arr) => arr.indexOf(step) === idx);
+
+      els.actionsGrid.innerHTML = actions.map(step => `
+        <button class="btn action-btn ${step === ticket.workflowStep ? 'ghost' : 'primary'}" data-step="${escapeHtml(step)}">
+          <span class="action-title">${step === ticket.workflowStep ? 'Reapply Current Step' : step}</span>
+          <span class="action-sub">${step === ticket.workflowStep ? 'Refresh blurb and notes' : 'Update workflow'}</span>
+        </button>
+      `).join('');
+
+      els.actionsGrid.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', () => setWorkflowStep(ticket.id, btn.dataset.step));
+      });
+
+      renderChecklist(ticket);
+      renderNotes(ticket);
+      renderBlurbPreview();
+    }
+
+    function renderChecklist(ticket) {
+      const config = categoryConfig[ticket.category];
+      const items = config?.checklist?.[ticket.workflowStep] || [];
+
+      if (!items.length) {
+        els.checklist.innerHTML = '<div class="empty-state">No checklist for this step.</div>';
+        return;
+      }
+
+      const state = ticket.checklistState?.[ticket.workflowStep] || [];
+      els.checklist.innerHTML = items.map((item, i) => `
+        <label class="check-item">
+          <input type="checkbox" data-index="${i}" ${state[i] ? 'checked' : ''} />
+          <span>${escapeHtml(item)}</span>
+        </label>
+      `).join('');
+
+      els.checklist.querySelectorAll('input[type="checkbox"]').forEach(box => {
+        box.addEventListener('change', () => {
+          const fresh = getSelectedTicket();
+          if (!fresh.checklistState) fresh.checklistState = {};
+          if (!fresh.checklistState[fresh.workflowStep]) {
+            fresh.checklistState[fresh.workflowStep] = new Array(items.length).fill(false);
+          }
+          fresh.checklistState[fresh.workflowStep][Number(box.dataset.index)] = box.checked;
+          fresh.updatedAt = new Date().toISOString();
+          persist();
+        });
+      });
+    }
+
+    function renderNotes(ticket) {
+      if (!ticket.notes?.length) {
+        els.notesList.innerHTML = '<div class="empty-state">No notes yet.</div>';
+        return;
+      }
+
+      const sorted = [...ticket.notes].sort((a, b) => new Date(b.at) - new Date(a.at));
+      els.notesList.innerHTML = sorted.map(note => `
+        <div class="note">
+          <div class="note-meta">${escapeHtml(formatDateTime(note.at))}</div>
+          <div>${escapeHtml(note.text)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderBlurbPreview() {
+      const ticket = getSelectedTicket();
+      if (!ticket) {
+        els.blurbPreview.textContent = 'No blurb available.';
+        return;
+      }
+
+      const template = getBlurbTemplate(ticket.category, ticket.workflowStep);
+      els.blurbPreview.textContent = fillTemplate(template, ticket);
+    }
+
+    function renderQuickSelect() {
+      const options = appState.tickets.map(ticket => `
+        <option value="${ticket.id}" ${ticket.id === appState.selectedTicketId ? 'selected' : ''}>${ticket.id} — ${ticket.summary}</option>
+      `).join('');
+      els.quickTicketSelect.innerHTML = options;
+    }
+
+    function renderQuickSearchResults() {
+      const term = els.quickSearchInput.value.trim().toLowerCase();
+      const tickets = getFilteredTickets(term).slice(0, 6);
+
+      if (!tickets.length) {
+        els.quickSearchResults.innerHTML = '<div class="empty-state">No matching tickets.</div>';
+        return;
+      }
+
+      els.quickSearchResults.innerHTML = tickets.map(ticket => `
+        <div class="ticket" data-id="${ticket.id}">
+          <div class="ticket-id">${escapeHtml(ticket.id)}</div>
+          <div class="ticket-title">${escapeHtml(ticket.summary)}</div>
+          <div class="tiny">${escapeHtml(ticket.category)} • ${escapeHtml(ticket.workflowStep)}</div>
+        </div>
+      `).join('');
+
+      els.quickSearchResults.querySelectorAll('.ticket').forEach(card => {
+        card.addEventListener('click', () => {
+          appState.selectedTicketId = card.dataset.id;
+          persist();
+          renderDetail();
+          renderQuickSelect();
+          showScreen('detail');
+        });
+      });
+    }
+
+    function getFilteredTickets(searchTerm = '') {
+      return appState.tickets.filter(ticket => {
+        const categoryOk = appState.activeCategoryFilter === 'All' || ticket.category === appState.activeCategoryFilter;
         const haystack = [
-          ticket.id, ticket.requester, ticket.campus, ticket.room,
-          ticket.summary, ticket.status, ticket.priority
-        ].join(" ").toLowerCase();
+          ticket.id,
+          ticket.summary,
+          ticket.requestor,
+          ticket.category,
+          ticket.subcategory,
+          ticket.campus,
+          ticket.workflowStep,
+          ticket.reference,
+          ticket.assignedTo
+        ].join(' ').toLowerCase();
 
-        const matchesSearch = !q || haystack.includes(q);
-        const matchesFilter =
-          state.activeFilter === "All" ||
-          (state.activeFilter === "New" && ticket.status === "New") ||
-          (state.activeFilter === "In Progress" && ticket.status === "In Progress") ||
-          (state.activeFilter === "Waiting" && ticket.status === "Waiting") ||
-          (state.activeFilter === "Resolved" && ticket.status === "Resolved") ||
-          (state.activeFilter === "High Priority" && ticket.priority === "High");
-
-        return matchesSearch && matchesFilter;
+        return categoryOk && (!searchTerm || haystack.includes(searchTerm));
       });
     }
 
-    function groupByCampus(list){
-      const map = {};
-      list.forEach(ticket => {
-        if(!map[ticket.campus]) map[ticket.campus] = [];
-        map[ticket.campus].push(ticket);
-      });
-      return Object.entries(map);
+    function getSelectedTicket() {
+      return appState.tickets.find(t => t.id === appState.selectedTicketId) || appState.tickets[0] || null;
     }
 
-    function setScreen(name){ state.screen = name; render(); }
-    function setFilter(value){ state.activeFilter = value; render(); }
-    function setViewMode(value){ state.viewMode = value; render(); }
-    function updateSearch(value){ state.search = value; render(); }
-
-    function openTicket(id){
-      state.selectedTicketId = id;
-      state.screen = "detail";
-      render();
+    function setWorkflowStep(ticketId, step) {
+      const ticket = appState.tickets.find(t => t.id === ticketId);
+      if (!ticket) return;
+      ticket.workflowStep = step;
+      ticket.universalStatus = inferUniversalStatus(step);
+      ticket.updatedAt = new Date().toISOString();
+      ticket.nextAction = inferNextAction(ticket.category, step);
+      pushNote(ticket, `Workflow updated to: ${step}`);
+      persist();
+      renderAll();
+      showToast(`Updated ${ticket.id} to ${step}`);
     }
 
-    function startUpdate(actionName){
-      const action = QUICK_ACTIONS[actionName];
-      const ticket = selectedTicket();
-      state.selectedAction = actionName;
-      state.updateText = action.body;
-      state.statusChange = action.status;
-      state.assetTag = "";
-      state.serialNumber = "";
-      state.roomNumber = ticket ? ticket.room : "";
-      state.screen = "update";
-      render();
+    function inferUniversalStatus(step) {
+      const map = {
+        'Request': 'New',
+        'Pending Approval': 'Waiting',
+        'Approved': 'Active',
+        'Order Submitted': 'Active',
+        'Shipped': 'Waiting',
+        'Received': 'Active',
+        'Processing': 'Active',
+        'Ready for Pickup / Interoffice': 'Scheduled',
+        'Completed': 'Complete',
+        'Photo / Verification': 'Active',
+        'Printed': 'Active',
+        'Ready for Pickup': 'Scheduled',
+        'Needs Clarification': 'Waiting',
+        'Assigned': 'Active',
+        'Testing': 'Active',
+        'In Progress': 'Active',
+        'Waiting on User': 'Waiting',
+        'Scheduled': 'Scheduled',
+        'Resolved': 'Complete',
+        'Closed': 'Closed'
+      };
+      return map[step] || 'Active';
     }
 
-    function setDraftField(field, value){
-      state[field] = value;
-    }
-
-    function saveUpdate(mode){
-      const ticket = selectedTicket();
-      if(!ticket) return;
-
-      const stamp = nowStamp();
-      const extra = [];
-      if(state.assetTag.trim()) extra.push(`Asset Tag: ${state.assetTag.trim()}`);
-      if(state.serialNumber.trim()) extra.push(`Serial: ${state.serialNumber.trim()}`);
-      if(state.roomNumber.trim()) extra.push(`Room: ${state.roomNumber.trim()}`);
-
-      const body = [state.updateText.trim(), ...extra].filter(Boolean).join("\n");
-
-      ticket.status = state.statusChange || ticket.status;
-      ticket.room = state.roomNumber.trim() || ticket.room;
-      ticket.updated = stamp;
-      ticket.notes.unshift({
-        time: stamp,
-        tech: "Rob Example",
-        body: body || "Update saved."
-      });
-
-      if(mode === "offline"){
-        state.offlineQueue += 1;
-        state.syncMessage = "Update saved locally; sync pending";
-      }else{
-        state.syncMessage = "Local update saved";
+    function inferNextAction(category, step) {
+      const steps = categoryConfig[category]?.steps || [];
+      const idx = steps.indexOf(step);
+      if (idx >= 0 && idx < steps.length - 1) {
+        return `Next workflow step: ${steps[idx + 1]}`;
       }
-
-      persistState();
-      state.screen = "detail";
-      render();
+      return 'Review for final follow-up or closure';
     }
 
-    function clearOfflineQueue(){
-      state.offlineQueue = 0;
-      state.syncMessage = "Offline queue cleared";
-      persistState();
-      render();
+    function getBlurbTemplate(category, step) {
+      return categoryConfig[category]?.blurbs?.[step] || 'Update completed for [DEVICE] on [DATE]. Reference: [MTN]. [BUDGET]';
     }
 
-    function resetDemoData(){
-      localStorage.removeItem(STORAGE_KEY);
-      state.tickets = clone(DEFAULT_TICKETS);
-      state.selectedTicketId = state.tickets[0] ? state.tickets[0].id : null;
-      state.search = "";
-      state.activeFilter = "All";
-      state.viewMode = "list";
-      state.offlineQueue = 0;
-      state.syncMessage = "Demo data reset";
-      state.screen = "tickets";
-      persistState();
-      render();
+    function fillTemplate(template, ticket) {
+      const date = els.varDate.value || new Date().toISOString().slice(0, 10);
+      const dateText = formatDateOnly(date);
+      const device = (els.varDevice.value || ticket.subcategory || ticket.summary || 'item').trim();
+      const mtn = (els.varMtn.value || ticket.reference || '').trim() || 'N/A';
+      const budget = (els.varBudget.value || '').trim() || 'None';
+
+      return template
+        .replaceAll('[DATE]', dateText)
+        .replaceAll('[DEVICE]', device)
+        .replaceAll('[MTN]', mtn)
+        .replaceAll('[BUDGET]', budget);
     }
 
-    function renderTopbar(){
-      const topbar = document.getElementById("topbar");
-      const installLabel = state.deferredPrompt ? "Install" : "Menu";
-      topbar.innerHTML = `
-        <div class="topbar-row">
-          <div>
-            <h1 class="app-title">Field Tech</h1>
-            <div class="app-subtitle">${APP_VERSION} Standalone</div>
-          </div>
-          <button class="icon-btn" onclick="${state.deferredPrompt ? 'installApp()' : 'setScreen(\'settings\')'}">${installLabel}</button>
-        </div>
-      `;
-    }
-
-    function renderTicketsScreen(){
-      const list = filteredTickets();
-      const filters = ["All","New","In Progress","Waiting","Resolved","High Priority"];
-
-      let body = `
-        <input class="search-box" placeholder="Search ticket, user, campus, room" value="${escapeHtml(state.search)}" oninput="updateSearch(this.value)">
-        <div class="chips-wrap">
-          <div class="chips-track">
-            ${filters.map(filter => `
-              <button class="chip ${state.activeFilter === filter ? "active" : ""}" onclick="setFilter('${filter.replace(/'/g,"\\'")}')">${filter}</button>
-            `).join("")}
-          </div>
-        </div>
-        <div class="toggle-row">
-          <button class="toggle-btn ${state.viewMode === "list" ? "active" : ""}" onclick="setViewMode('list')">List</button>
-          <button class="toggle-btn ${state.viewMode === "campus" ? "active" : ""}" onclick="setViewMode('campus')">By Campus</button>
-        </div>
-        <div class="summary-strip">${list.length} tickets shown · Offline queue: ${state.offlineQueue}</div>
-      `;
-
-      if(state.viewMode === "list"){
-        body += list.length ? list.map(ticket => `
-          <div class="card ticket-card" onclick="openTicket('${escapeHtml(ticket.id)}')">
-            <div class="ticket-top">
-              <h3 class="ticket-id">${escapeHtml(ticket.id)}</h3>
-              <div class="badge-stack">
-                <span class="badge ${statusClass(ticket.status)}">${escapeHtml(ticket.status)}</span>
-                <span class="badge ${priorityClass(ticket.priority)}">${escapeHtml(ticket.priority)}</span>
-              </div>
-            </div>
-            <div class="ticket-user">${escapeHtml(ticket.requester)}</div>
-            <div class="ticket-meta">${escapeHtml(ticket.campus)} · Room ${escapeHtml(ticket.room)}</div>
-            <div class="ticket-summary">${escapeHtml(ticket.summary)}</div>
-            <div class="ticket-footer">
-              <span>Updated ${escapeHtml(ticket.updated)}</span>
-              <strong>Open</strong>
-            </div>
-          </div>
-        `).join("") : `<div class="card empty">No tickets match the current search/filter.</div>`;
-      } else {
-        const groups = groupByCampus(list);
-        body += groups.length ? groups.map(([campus, tickets]) => `
-          <div class="card">
-            <h3 class="campus-group-title">${escapeHtml(campus)}</h3>
-            ${tickets.map(ticket => `
-              <div class="campus-ticket" onclick="openTicket('${escapeHtml(ticket.id)}')">
-                <div class="ticket-top">
-                  <strong>${escapeHtml(ticket.id)}</strong>
-                  <span class="badge ${statusClass(ticket.status)}">${escapeHtml(ticket.status)}</span>
-                </div>
-                <div class="ticket-meta">${escapeHtml(ticket.requester)} · Room ${escapeHtml(ticket.room)}</div>
-                <div class="ticket-summary">${escapeHtml(ticket.summary)}</div>
-              </div>
-            `).join("")}
-          </div>
-        `).join("") : `<div class="card empty">No campus groups to show.</div>`;
-      }
-
-      body += `
-        <div class="bottom-nav">
-          <button class="nav-btn active" onclick="setScreen('tickets')">Tickets</button>
-          <button class="nav-btn" onclick="setViewMode(state.viewMode === 'list' ? 'campus' : 'list')">Queue</button>
-          <button class="nav-btn" onclick="startUpdate('Working Note')">Update</button>
-          <button class="nav-btn" onclick="setScreen('settings')">Settings</button>
-        </div>
-      `;
-      return body;
-    }
-
-    function renderDetailScreen(){
-      const ticket = selectedTicket();
-      if(!ticket) return `<div class="card empty">No ticket selected.</div>`;
-
-      return `
-        <div class="card">
-          <div class="section-label">Main Info</div>
-          <div class="detail-grid">
-            <div>Status<strong>${escapeHtml(ticket.status)}</strong></div>
-            <div>Priority<strong>${escapeHtml(ticket.priority)}</strong></div>
-            <div>Category<strong>${escapeHtml(ticket.category)}</strong></div>
-            <div>Subcategory<strong>${escapeHtml(ticket.subcategory)}</strong></div>
-          </div>
-          <div style="height:10px"></div>
-          <div class="detail-text">${escapeHtml(ticket.summary)}</div>
-        </div>
-
-        <div class="card">
-          <div class="section-label">Requester</div>
-          <div class="detail-text">
-            ${escapeHtml(ticket.requester)}<br>
-            ${escapeHtml(ticket.phone)}<br>
-            ${escapeHtml(ticket.email)}<br>
-            ${escapeHtml(ticket.campus)}<br>
-            Room ${escapeHtml(ticket.room)}
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="section-label">Assignment</div>
-          <div class="detail-text">
-            ${escapeHtml(ticket.assignedTech)}<br>
-            ${escapeHtml(ticket.assignedGroup)}<br>
-            Opened: ${escapeHtml(ticket.opened)}<br>
-            Updated: ${escapeHtml(ticket.updated)}
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="section-label">Recent Updates</div>
-          ${ticket.notes.length ? ticket.notes.map(note => `
-            <div class="note">
-              <div class="note-meta">${escapeHtml(note.time)} · ${escapeHtml(note.tech)}</div>
-              <div class="note-body">${escapeHtml(note.body)}</div>
-            </div>
-          `).join("") : `<div class="empty">No updates yet.</div>`}
-        </div>
-
-        <div class="bottom-actions">
-          <button class="action-btn" onclick="startUpdate('On Site')">On Site</button>
-          <button class="action-btn" onclick="startUpdate('Contacted User')">Contacted</button>
-          <button class="action-btn" onclick="startUpdate('Waiting on User')">Waiting</button>
-          <button class="action-btn" onclick="startUpdate('Resolved')">Resolved</button>
-          <button class="action-btn primary" onclick="startUpdate('Working Note')">Add Note</button>
-        </div>
-
-        <div class="bottom-nav">
-          <button class="nav-btn" onclick="setScreen('tickets')">Back</button>
-          <button class="nav-btn active" onclick="setScreen('detail')">Detail</button>
-          <button class="nav-btn" onclick="startUpdate('Working Note')">Update</button>
-          <button class="nav-btn" onclick="setScreen('settings')">Settings</button>
-        </div>
-      `;
-    }
-
-    function renderUpdateScreen(){
-      const statuses = ["New","In Progress","Waiting","Resolved"];
-      const ticket = selectedTicket();
-
-      return `
-        <div class="card">
-          <div class="section-label">Ticket</div>
-          <div class="detail-text">${ticket ? `${escapeHtml(ticket.id)} · ${escapeHtml(ticket.requester)}` : "No ticket selected"}</div>
-
-          <div class="field-block">
-            <label class="field-label">Quick Actions</label>
-            <div class="grid-2">
-              ${Object.keys(QUICK_ACTIONS).map(action => `
-                <button class="small-btn ${state.selectedAction === action ? "active" : ""}" onclick="pickAction('${action.replace(/'/g,"\\'")}')">${action}</button>
-              `).join("")}
-            </div>
-          </div>
-
-          <div class="field-block">
-            <label class="field-label">Update Note</label>
-            <textarea class="field-textarea" oninput="setDraftField('updateText', this.value)">${escapeHtml(state.updateText)}</textarea>
-          </div>
-
-          <div class="field-block">
-            <label class="field-label">Optional Fields</label>
-            <div class="grid-3">
-              <input class="field-input" placeholder="Asset Tag" value="${escapeHtml(state.assetTag)}" oninput="setDraftField('assetTag', this.value)">
-              <input class="field-input" placeholder="Serial Number" value="${escapeHtml(state.serialNumber)}" oninput="setDraftField('serialNumber', this.value)">
-              <input class="field-input" placeholder="Room Number" value="${escapeHtml(state.roomNumber)}" oninput="setDraftField('roomNumber', this.value)">
-            </div>
-          </div>
-
-          <div class="field-block">
-            <label class="field-label">Status Change</label>
-            <select class="field-select" onchange="setDraftField('statusChange', this.value)">
-              ${statuses.map(status => `<option ${state.statusChange === status ? "selected" : ""}>${status}</option>`).join("")}
-            </select>
-          </div>
-
-          <div class="field-block grid-3">
-            <button class="primary-btn" onclick="saveUpdate('live')">Save</button>
-            <button class="secondary-btn" onclick="saveUpdate('offline')">Offline</button>
-            <button class="secondary-btn" onclick="setScreen('detail')">Cancel</button>
-          </div>
-        </div>
-
-        <div class="bottom-nav">
-          <button class="nav-btn" onclick="setScreen('tickets')">Tickets</button>
-          <button class="nav-btn" onclick="setScreen('detail')">Detail</button>
-          <button class="nav-btn active" onclick="setScreen('update')">Update</button>
-          <button class="nav-btn" onclick="setScreen('settings')">Settings</button>
-        </div>
-      `;
-    }
-
-    function renderSettingsScreen(){
-      return `
-        <div class="card">
-          <div class="section-label">Status</div>
-          <div class="detail-text">
-            ${escapeHtml(state.syncMessage)}<br>
-            Offline queue: ${state.offlineQueue}<br>
-            Saved locally in browser storage
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="section-label">Useful V1 Features</div>
-          <div class="helper-text">
-            • Multiple realistic tickets<br>
-            • Search and status filters<br>
-            • List and by-campus view<br>
-            • Ticket detail and note history<br>
-            • Quick actions with local persistence<br>
-            • Offline queue simulation<br>
-            • Install button when supported
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="section-label">Demo Tools</div>
-          <div class="grid-2">
-            <button class="primary-btn" onclick="clearOfflineQueue()">Clear Offline Queue</button>
-            <button class="secondary-btn" onclick="resetDemoData()">Reset Demo Data</button>
-          </div>
-          <div style="height:10px"></div>
-          <button class="secondary-btn" onclick="setScreen('tickets')">Back to Tickets</button>
-        </div>
-
-        <div class="bottom-nav">
-          <button class="nav-btn" onclick="setScreen('tickets')">Tickets</button>
-          <button class="nav-btn" onclick="setViewMode(state.viewMode === 'list' ? 'campus' : 'list'); setScreen('tickets');">Queue</button>
-          <button class="nav-btn" onclick="startUpdate('Working Note')">Update</button>
-          <button class="nav-btn active" onclick="setScreen('settings')">Settings</button>
-        </div>
-      `;
-    }
-
-    function render(){
-      renderTopbar();
-      const screen = document.getElementById("screen");
-      if(state.screen === "detail"){
-        screen.innerHTML = renderDetailScreen();
-      }else if(state.screen === "update"){
-        screen.innerHTML = renderUpdateScreen();
-      }else if(state.screen === "settings"){
-        screen.innerHTML = renderSettingsScreen();
-      }else{
-        screen.innerHTML = renderTicketsScreen();
+    async function copyCurrentBlurb() {
+      const text = els.blurbPreview.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Blurb copied');
+      } catch (err) {
+        showToast('Clipboard failed');
       }
     }
 
-    function pickAction(actionName){
-      const action = QUICK_ACTIONS[actionName];
-      state.selectedAction = actionName;
-      state.updateText = action.body;
-      state.statusChange = action.status;
-      render();
+    function addCurrentBlurbAsNote() {
+      const ticket = getSelectedTicket();
+      if (!ticket) return;
+      pushNote(ticket, els.blurbPreview.textContent.trim());
+      ticket.updatedAt = new Date().toISOString();
+      persist();
+      renderNotes(ticket);
+      showToast('Blurb added to notes');
     }
 
-    async function installApp(){
-      if(!state.deferredPrompt) return;
-      state.deferredPrompt.prompt();
-      try{
-        await state.deferredPrompt.userChoice;
-      }catch(error){}
-      state.deferredPrompt = null;
-      render();
+    function saveManualNote() {
+      const ticket = getSelectedTicket();
+      const text = els.noteInput.value.trim();
+      if (!ticket || !text) {
+        showToast('Enter a note first');
+        return;
+      }
+      pushNote(ticket, text);
+      ticket.updatedAt = new Date().toISOString();
+      els.noteInput.value = '';
+      persist();
+      renderNotes(ticket);
+      showToast('Note saved');
     }
 
-    window.setScreen = setScreen;
-    window.setFilter = setFilter;
-    window.setViewMode = setViewMode;
-    window.updateSearch = updateSearch;
-    window.openTicket = openTicket;
-    window.startUpdate = startUpdate;
-    window.setDraftField = setDraftField;
-    window.saveUpdate = saveUpdate;
-    window.clearOfflineQueue = clearOfflineQueue;
-    window.resetDemoData = resetDemoData;
-    window.pickAction = pickAction;
-    window.installApp = installApp;
+    function quickApplyStep(step) {
+      const ticketId = els.quickTicketSelect.value || appState.selectedTicketId;
+      if (!ticketId) {
+        showToast('Select a ticket first');
+        return;
+      }
+      appState.selectedTicketId = ticketId;
+      setWorkflowStep(ticketId, step);
+      renderQuickSelect();
+    }
 
-    loadState();
-    render();
+    function createTicket() {
+      const summary = els.newSummary.value.trim();
+      const requestor = els.newRequestor.value.trim();
+      const category = els.newCategory.value;
+      if (!summary || !requestor || !category) {
+        showToast('Summary, requestor, and category are required');
+        return;
+      }
 
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      state.deferredPrompt = e;
-      render();
-    });
+      const ticket = {
+        id: nextTicketId(),
+        summary,
+        requestor,
+        category,
+        subcategory: els.newSubcategory.value.trim() || 'General',
+        campus: els.newCampus.value.trim() || '—',
+        priority: els.newPriority.value,
+        assignedTo: els.newAssigned.value.trim() || 'Unassigned',
+        reference: els.newRef.value.trim(),
+        universalStatus: 'New',
+        workflowStep: categoryConfig[category]?.steps?.[0] || 'Request',
+        nextAction: 'Review ticket and set workflow step',
+        updatedAt: new Date().toISOString(),
+        notes: [],
+        checklistState: {}
+      };
 
-    window.addEventListener("appinstalled", () => {
-      state.deferredPrompt = null;
-      state.syncMessage = "App installed";
-      render();
-    });
+      appState.tickets.unshift(ticket);
+      appState.selectedTicketId = ticket.id;
+      clearCreateForm();
+      persist();
+      renderAll();
+      showScreen('detail');
+      showToast(`Created ${ticket.id}`);
+    }
 
-    if("serviceWorker" in navigator){
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+    function clearCreateForm() {
+      els.newSummary.value = '';
+      els.newRequestor.value = '';
+      els.newSubcategory.value = '';
+      els.newCampus.value = '';
+      els.newPriority.value = 'Normal';
+      els.newAssigned.value = '';
+      els.newRef.value = '';
+      els.newCategory.selectedIndex = 0;
+    }
+
+    function populateCategorySelects() {
+      const options = Object.keys(categoryConfig).map(cat => `<option>${escapeHtml(cat)}</option>`).join('');
+      els.newCategory.innerHTML = options;
+    }
+
+    function pushNote(ticket, text) {
+      if (!ticket.notes) ticket.notes = [];
+      ticket.notes.push({ at: new Date().toISOString(), text });
+    }
+
+    function resetDemoData() {
+      if (!confirm('Reset the app to demo data? This clears current local changes.')) return;
+      appState = structuredClone(demoData);
+      persist();
+      setDefaultVars();
+      renderAll();
+      showScreen('dashboard');
+      showToast('Demo data restored');
+    }
+
+    function showScreen(screen) {
+      Object.entries(els.screens).forEach(([key, el]) => {
+        el.classList.toggle('active', key === screen);
       });
+      els.navButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.screen === screen);
+      });
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => els.toast.classList.remove('show'), 1800);
+    }
+
+    function setDefaultVars() {
+      els.varDate.value = new Date().toISOString().slice(0, 10);
+      els.varDevice.value = '';
+      els.varMtn.value = '';
+      els.varBudget.value = '';
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(demoData);
+        const parsed = JSON.parse(raw);
+        return parsed?.tickets?.length ? parsed : structuredClone(demoData);
+      } catch {
+        return structuredClone(demoData);
+      }
+    }
+
+    function persist() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    function nextTicketId() {
+      const numbers = appState.tickets
+        .map(t => Number(String(t.id).replace(/[^0-9]/g, '')))
+        .filter(n => !Number.isNaN(n));
+      const next = (numbers.length ? Math.max(...numbers) : 1000) + 1;
+      return `RP-${next}`;
+    }
+
+    function formatDateOnly(value) {
+      const date = new Date(`${value}T12:00:00`);
+      return date.toLocaleDateString(undefined, {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+
+    function formatDateTime(value) {
+      const date = new Date(value);
+      return date.toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit'
+      });
+    }
+
+    function isoNow(offsetHours = 0) {
+      return new Date(Date.now() + offsetHours * 60 * 60 * 1000).toISOString();
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function cssSafe(str) {
+      return String(str).replace(/[^a-zA-Z0-9_-]/g, '-');
     }
   </script>
 </body>
